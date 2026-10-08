@@ -1,0 +1,447 @@
+/* Don't use @import to load fonts in production! It's slow and will cause FOUC.
+Instead, self-host the fonts, or use https://fontsource.org/ 
+
+See also JetBrains Mono: 
+
+  https://www.jetbrains.com/lp/mono/
+  https://fonts.google.com/specimen/JetBrains+Mono?specimen.preview.text=30 */
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
+
+@import 'tailwindcss';
+@import '@nuxt/ui';
+
+/* ======================
+        :root
+====================== */
+
+:root {
+  /* https://ui.nuxt.com/docs/getting-started/theme/css-variables#radius
+  Nuxt UI overrides Tailwind CSS's default rounded-* utilities with a unified border radius system.
+  Utility classes are calculated based on a global --ui-radius CSS variable, which defines the base 
+  radius value applied across all components for a consistent look.
+  Tailwind itself doesn't have a base --radius variable from which all others (--radius-xs, --radius-sm, etc.) '
+  are derived
+
+    https://github.com/tailwindlabs/tailwindcss/blob/main/packages/tailwindcss/src/compat/default-theme.ts
+    https://tailwindcss.com/docs/theme#default-theme-variable-reference
+
+  So --ui-radius is helpful. Moreover, it mirrors what Tailwind already does. However, I would not rely too heavily on
+  --ui-radius directly in case you decide to one day remove Nuxt UI. Instead, prefer the custom --radius defined below. */
+
+  /* --ui-radius: 0.25rem; */
+
+  /* Nuxt UI will automatically apply the --ui-bg to <body>. 
+  Use *-default classes to use it. In this case, I we're using
+  a slightly off-white color for the --ui-bg. However, in order
+  to maintain consistency it's important to also shift all the 
+  other variants to match. */
+
+  --ui-bg: #f3f4f1;
+  --ui-bg-muted: var(--ui-color-neutral-100);
+  --ui-bg-elevated: var(--ui-color-neutral-200); /* ??? */
+  --ui-bg-accented: var(--ui-color-neutral-300); /* ??? */
+  --ui-bg-inverted: var(--ui-color-neutral-900); /* ??? */
+
+  /* Nuxt UI has various text classes. The --ui-text value becomes the default that Nuxt UI applies to the body.
+  Currently, I see no reason to change them. Plus if you change one, then you have to modify the gradients on
+  all the others to maintain consistency. The order listed below is light -> dark in light mode and the 
+  inverse in dark mode:
+  
+    --ui-text-dimmed
+    --ui-text-muted
+    --ui-text-toned
+    --ui-text: change the base text color (e.g., --ui-text: #212529)
+    --ui-text-highlighted
+    --ui-text-inverted
+  */
+
+  /* Nuxt UI does border colors a little weird. In my opinion, light mode's
+  muted should be the lightest, and accent should be the darkest. Conversely,
+  dark mode's muted should be the darkest and accent should be the lightest.
+  While this makes the most sense all alone, it's possible that the actual 
+  Nuxt UI components rely more heavily on the their defaults, despite being
+  somewhat inconsistent. I haven't tested enough components to know if this
+  actually throws things off, but for now these changes make the most sense. */
+  --ui-border-muted: var(--color-neutral-200);
+  --ui-border: var(--color-neutral-300);
+  --ui-border-accented: var(--color-neutral-400);
+
+  /*# The shortcoming here is that we don't have more generic colors such that: outline-muted. */
+  /*# It may make sense to create generic colors that mimic either the background, border, or text variants, but which one... */
+
+  /* --card and --color-card are relics from ShadCN.
+  The purpose of --card in ShadCN's design system is specifically intended 
+  to create surfaces that visually distinguish from the background, providing 
+  depth and hierarchy. This applies not just to Card components, but to any 
+  container that needs to "pop" or stand out as a distinct surface. */
+
+  --card: rgb(248, 248, 248);
+  /* This is used as a lighter variation on top of the card color.
+  For example, if you have a form that is bg-card, then the inputs
+  can be bg-card-accented. Obviouly, this is only effective if your
+  --card color isn't maximally white (or black in dark mode). */
+  --card-accented: #fff;
+  --card-inverted: oklch(24.35% 0.042 262.9);
+
+  --ring: oklch(0.708 0 0);
+
+  --vue-green: #42b883;
+  --vue-gray: #35495e;
+
+  --ui-primary: var(--vue-green);
+  --ui-secondary: var(--vue-gray);
+}
+
+/* ======================
+        .dark
+====================== */
+
+.dark {
+  /* Technically neutral is slate as mentioned elsewhere. */
+  --ui-bg: var(--ui-color-neutral-900);
+  --ui-bg-muted: var(--ui-color-neutral-800);
+  --ui-bg-elevated: var(--ui-color-neutral-800);
+  --ui-bg-accented: var(--ui-color-neutral-700);
+  --ui-bg-inverted: #f3f4f1;
+
+  --ui-border-muted: var(--ui-color-neutral-800);
+  --ui-border: var(--ui-color-neutral-700);
+  --ui-border-accented: var(--ui-color-neutral-600);
+
+  /* Already --ui-color-primary-400 by default
+  --ui-primary: var(--ui-color-primary-400); */
+
+  /* In the case of --vue-gray as the secondary color, it works fine in light, 
+  but is too dark in dark mode: --ui-color-secondary-800. Better to go with a
+  400, 500 or 600 even if it's not the true brand color. */
+  --ui-secondary: var(--ui-color-secondary-600);
+  --ui-error: var(--ui-color-error-500);
+
+  /* Slate 900 is roughly rgb(15, 23, 42) 
+  Slate 800 is roughly rgb(29, 41, 61) or rgb(28.59, 40.81, 60.86)
+  In light mode we essentially bump the card color rgb by 5+ for r,g and b.
+  Here, a jump from slate 900 to slate 800 would be more of a 15+ jump.
+  If we want to bump by exactly 5, we could do this:
+
+    --card: rgb(20, 28, 47);
+
+  However, that feels too dark still. In this case, splitting the differnce 
+  between slate 900 and 800 feels better. */
+
+  --card: oklch(24.35% 0.042 262.9);
+  --card-accented: var(--color-slate-800);
+  --card-inverted: rgb(248, 248, 248);
+
+  --ring: oklch(0.556 0 0);
+}
+
+/* ======================
+        Theme
+====================== */
+/* Note: With semantic colors like primary, secondary, success, info, error, warning, and neutral
+Nuxt UI seems to also allow for a shorthand such that *-primary-500, *-secondary-500, etc.
+can be written as *-primary and *-secondary, respectively. See here:
+https://ui.nuxt.com/docs/getting-started/theme/css-variables#colors
+
+But actually the default color is 500 in light and 400 in dark, so it has somewhat more nuanced behavior.
+
+⚠️ This must be @theme static - NOT @theme inline. Otherwise, Nuxt UI won't read from it correctly,
+and won't update --ui-*-* CSS variables when told to do so in vite.config.ts.
+*/
+@theme static {
+  --color-card: var(--card);
+
+  --color-card-accented: var(--card-accented);
+
+  /* ⚠️ Note: Nuxt UI generates --ui-color-*-* CSS variables. Use
+  those when you need the custom property instead of a class name. */
+
+  /* Currently, primary and secondary are based off the the Vue green and gray.
+  See here for brand colors:https://brandcolors.net/  
+  
+  However, those brand colors are not treated as the 500 variants.
+  Instead, I went to:
+
+    https://uicolors.app/generate/42b883
+    https://uicolors.app/generate/35495e
+
+  which ended up placing them at 400 and 800 respectively.
+  In other words, the generator assesed the starting color more
+  intelligently, placed it accordingy to its relative tone/brightness
+  (i.e., lightness spectrum), then built a palette around it. 
+  
+  In some cases what we really want is the actual primary or secondary color.
+  For that, we could do this:
+
+    --ui-primary-abs: var(--vue-gree);      ❌
+    --ui-secondary-abs: var(--vue-gray);    ❌
+
+    --color-primary-abs: var(--vue-green);  ❌
+    --color-secondary-abs: var(--vue-gray); ❌
+
+  But this will just add another layer of complexity to the color system.
+    
+  Moreover, this doesn't change the fact that Nuxt UI's --ui-primary is generated from
+  --color-primary-500 in light and --color-primary-400 in light, and the --ui-* shorthand
+  is always what's used in component props like: <Button color="primary" />.
+  
+  Ultimately, once you find a  light --ui-primary / --ui-secondary and dark --ui-primary / --ui-secondary
+  that works for you, the shorthands begin to be very useful, but until then it feels like you're fighting
+  the system. */
+
+  --color-primary-50: #eefbf4;
+  --color-primary-100: #d6f5e3;
+  --color-primary-200: #b1e9ca;
+  --color-primary-300: #7ed7ac;
+  --color-primary-400: var(--vue-green);
+  --color-primary-500: #27a26f;
+  --color-primary-600: #136949;
+  --color-primary-700: #188359;
+  --color-primary-800: #136949;
+  --color-primary-900: #104432;
+  --color-primary-950: #08261c;
+
+  --color-secondary-50: #f5f7fa;
+  --color-secondary-100: #eaeef4;
+  --color-secondary-200: #d1dbe6;
+  --color-secondary-300: #a9bdd0;
+  --color-secondary-400: #7a9ab6;
+  --color-secondary-500: #5a7d9d;
+  --color-secondary-600: #466483;
+  --color-secondary-700: #3a516a;
+  --color-secondary-800: var(--vue-gray);
+  --color-secondary-900: #2e3c4c;
+  --color-secondary-950: #1e2733;
+
+  /* ⚠️ Nuxt UI treats neutral as a semantic color, but actually maps Tailwind's slate to it!
+  This is super whacky! It means if you try to use any variant of neutral, you'll actually get
+  slate! 
+
+  If your neutral alias is slate (the default), you've effectively lost access to Tailwind's 
+  true neutral (near-black-gray, no blue tint) gray scale via utility classes 
+  — bg-neutral-500 will always give you slate-500, not real neutral, unless you explicitly 
+  set neutral: 'neutral' in your app config.
+
+  Why they did it this way: neutral is one of Nuxt UI's 7 official semantic tokens, and it's meant to drive 
+  all the chrome/text/border styling throughout every component (buttons, borders, backgrounds, etc.) with 
+  automatic light/dark switching baked in via --ui-*. Rather than force you to always write bg-{your-chosen-gray}-* 
+  in your own markup, they wanted bg-neutral-* (and text-neutral-*, border-neutral-*, etc.) to "just work" 
+  and follow whatever gray you picked in app.config.ts — even outside their components. Overwriting the real 
+  --color-neutral-* scale is how they make that happen without you having to remap every class yourself. 
+  
+  Seems like they could've avoided this limitation / conflict simply by using a different naming convention
+  (e.g., monochrome, plain, etc.) 
+  
+  However, if you really need the original neutral back, they actually expose a set of colors called old-neutral.
+  One other weird thing to note: While the other semantic colors like primary, secondary, error, etc. have shorthands
+  that allow for things like bg-primary, bg-secondary etc., the neutral color doesn't.
+  */
+
+  --color-ring: var(--ring);
+
+  /* Tailwind v4 uses this to apply the --default-font-family on html, :host */
+  --font-sans:
+    'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', 'Noto Sans',
+    Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+
+  --font-mono:
+    'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+    'Courier New', monospace;
+}
+
+/* ======================
+          Base
+====================== */
+/* Be careful when adding anything additional to the base layer. The Tailwind 
+preflight.css does a pretty good job already. If you go setting additional 
+properties here, you may get too accustomed to that behavior when building 
+components and be surprised when migrating those same components to a different 
+project that does not have the additional base styles. For that reason, it's 
+recommended that this not be changed. */
+
+@layer base {
+  * {
+    /* The idea here with border-default is that by simply applying `border` we immediately 
+    get the benefits of a default border color without explicitly having to set it. This idea
+    and  outline-ring/50 were adopted from the ShadCN design system. 
+    
+    However, see here for how Nuxt UI already handles focus:
+    https://ui.nuxt.com/docs/getting-started/theme/css-variables#focus */
+    @apply border-default; /* ❌ outline-ring/50 */
+  }
+
+  /* Nuxt UI applies default classes on the <body> element of your app for 
+  consistent  theming across light and dark modes.
+
+    https://ui.nuxt.com/docs/getting-started/theme/css-variables#body
+    @apply antialiased text-default bg-default scheme-light dark:scheme-dark; */
+  body {
+  }
+
+  /* Tailwind CSS v4 changed its Preflight so that buttons use cursor: default instead of 
+  cursor: pointer to match  browser defaults. If you'd like to restore the pointer cursor 
+  globally, add these base styles to your CSS: */
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+/* React often uses a <div id="root">. Vue prefers <div id="app">. Currently, 
+that element is being styled directly by Tailwind in the index.html */
+#app {
+}
+
+th {
+  text-align: -webkit-match-parent;
+}
+
+/* ======================
+      Components
+====================== */
+
+/* Use the components layer for any more complicated classes you want to add to 
+your project that you'd still like to be able to override with utility classes. 
+Note: In Tailwind v4, plain CSS inside @layer components { ... } is not registered
+as a Tailwind class. Consequently, it will gett flagged by tbetter-tailwindcss/no-unknown-classes.
+Either turn that rule off, or pass it an ignore config.
+
+
+  'better-tailwindcss/no-unknown-classes': ['warn', {
+    ignore: ['^terminal$']
+  }]
+*/
+
+@layer components {
+  /*  This is how Bootstap implements the padding hack trick. It was included for 
+  purposes of demonstration, but ultimately it's better to use Tailwind's aspect-*.
+
+  .ratio { position: relative; width: 100%; }
+
+  .ratio::before { display: block; padding-top: var(--aspect-ratio); content: ''; }
+  .ratio > * { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+  .ratio-1x1 { --aspect-ratio: 100%; }
+  .ratio-4x3 { --aspect-ratio: 75%; }
+  .ratio-16x9 { --aspect-ratio: 56.25%; }
+  .ratio-21x9 { --aspect-ratio: 42.8571428571%; } */
+
+  /* Technically, this is a utility, but I want 
+  tailwind utilities to be able to overwrite it. */
+  .hide-border {
+    margin: -1px 0px -1px -1px;
+    width: calc(100% + 1px);
+  }
+
+  /* ======================
+        .terminal
+  ====================== */
+  /* .terminal is just the monitor display styles. See @/component/Monitor for a better implementation. */
+
+  .terminal {
+    background-color: #000;
+    background-image: radial-gradient(rgba(0, 150, 0, 0.5), black 120%);
+    position: relative;
+  }
+
+  .terminal::after {
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.3),
+      rgba(0, 0, 0, 0.3) 1px,
+      transparent 1px,
+      transparent 2px
+    ) !important;
+    border-radius: inherit;
+    content: '';
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+  }
+
+  /* ======================
+      ul.custom-list
+  ====================== */
+  /* Obviously, this will only work in conjunction with Bootstrap icons. */
+
+  ul.custom-list {
+    list-style: none;
+    padding-left: 1.5em;
+  }
+
+  ul.custom-list li {
+    margin-bottom: 10px;
+  }
+
+  ul.custom-list li::before {
+    content: '\F270'; /* '\F287' */
+    color: var(--bs-primary);
+    font-family: 'Bootstrap-icons';
+    font-weight: bold;
+    display: inline-block;
+    width: 1.25em;
+    margin-left: -1em;
+  }
+
+  /* ======================
+      .transition-none 
+  ====================== */
+  /* Note: Tailwind already has a transition-none that sets
+  transition-property: none; However, this is useful for forcing
+  it everywhere. Currently, it's hardcoded on <html> to prevent 
+  light/dark theme transition from happening on mount. */
+
+  .transition-none-all,
+  .transition-none-all * {
+    -webkit-transition: none !important;
+    -moz-transition: none !important;
+    -ms-transition: none !important;
+    -o-transition: none !important;
+    transition: none !important;
+  }
+
+  /* ======================
+      .hide-scrollbar 
+  ====================== */
+
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* ======================
+       .stretched-link
+  ====================== */
+
+  .stretched-link::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+  }
+}
+
+/* ======================
+        Utilities
+====================== */
+/* To add a custom utility in v4.0, use the new @utility directive: */
+
+/* @utility your-class-name {} */
+
+/* ======================
+        Plugins
+====================== */
+
+/* ======================
+        Variants
+====================== */
