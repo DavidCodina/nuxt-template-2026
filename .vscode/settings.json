@@ -1,0 +1,63 @@
+///////////////////////////////////////////////////////////////////////////
+//
+// Initially, I had "dbaeumer.vscode-eslint" as the defaultFormatter for TS, JS and Vue.
+// Why "dbaeumer.vscode-eslint"? dbaeumer.vscode-eslint is the extension ID of the official
+// ESLint extension for VS Code. VS Code extension IDs have the form publisher.extension-name:
+//
+//   - dbaeumer is the publisher ID. It belongs to Dirk Baeumer, the Microsoft
+//     developer who created and maintains the extension.
+//
+//   - vscode-eslint is the extension’s name within that publisher.
+//
+// editor.defaultFormatter takes the ID of an installed extension that registers itself
+// as a formatter for a language. When you save or run “Format Document”, VS Code asks
+// that extension to produce the edits.
+//
+//   {
+//     "editor.formatOnSave": true,
+//     "editor.defaultFormatter": "esbenp.prettier-vscode",
+//     "[typescript]": { "editor.defaultFormatter": "dbaeumer.vscode-eslint" },
+//     "[javascript]": { "editor.defaultFormatter": "dbaeumer.vscode-eslint" },
+//     "[vue]": { "editor.defaultFormatter": "dbaeumer.vscode-eslint" },
+//     "editor.codeActionsOnSave": {
+//       "source.fixAll.eslint": "explicit"
+//     }
+//   }
+//
+// However, in modern setups (especially Vue, React, Nuxt, and TypeScript projects),
+// it's more common to let Prettier handle formatting and let ESLint handle fixes
+// through source.fixAll.eslint.
+//
+//   {
+//     "prettier.enable": true,
+//     "editor.formatOnSave": true,
+//     "editor.defaultFormatter": "esbenp.prettier-vscode",
+//     "editor.codeActionsOnSave": {
+//       "source.fixAll.eslint": "explicit"
+//     }
+//   }
+//
+// That said, one place where this runs into issues is here:
+//
+//   better-tailwindcss/enforce-consistent-line-wrapping
+//
+//   - ESLint’s enforce-consistent-line-wrapping wraps the classes.
+//   - Prettier re-joins them onto one line.
+//
+// Prettier always collapses the contents of a class attribute in Vue/HTML templates into
+// a single line (it trims and joins the whitespace-separated names), and no option turns this off.
+// So ultimately, I went back to no prettier on .vue, .ts, and .js files.
+//
+///////////////////////////////////////////////////////////////////////////
+
+{
+  "prettier.enable": true,
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[vue]": { "editor.defaultFormatter": "dbaeumer.vscode-eslint" },
+  "[typescript]": { "editor.defaultFormatter": "dbaeumer.vscode-eslint" },
+  "[javascript]": { "editor.defaultFormatter": "dbaeumer.vscode-eslint" },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  }
+}
