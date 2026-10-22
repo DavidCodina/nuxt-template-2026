@@ -196,6 +196,14 @@ definePageMeta({ auth: false })
                 date-style="long"
               />
               <UBadge
+                v-if="isOwner"
+                label="Owner"
+                color="success"
+                variant="subtle"
+                size="sm"
+              />
+
+              <UBadge
                 v-if="isEdited"
                 label="Edited"
                 color="info"
@@ -215,16 +223,30 @@ definePageMeta({ auth: false })
             {{ post.body }}
           </p>
 
-          <UButton
+          <div
             v-if="isOwner"
-            class="mt-6"
-            label="Delete"
-            icon="i-lucide-trash-2"
-            color="error"
-            variant="subtle"
-            :loading="isDeleting"
-            @click="handleDelete"
-          />
+            class="mt-6 flex justify-end gap-2"
+          >
+            <UButton
+              class="min-w-25 justify-center select-none"
+              label="Delete"
+              icon="i-lucide-trash-2"
+              color="error"
+              variant="subtle"
+              :loading="isDeleting"
+              @click="handleDelete"
+            />
+
+            <UButton
+              class="min-w-25 justify-center select-none"
+              label="Edit"
+              icon="i-lucide-pencil"
+              color="info"
+              variant="subtle"
+
+              @click="navigateTo(`/posts/${id}/edit`)"
+            />
+          </div>
         </section>
       </template>
     </PageContainer>

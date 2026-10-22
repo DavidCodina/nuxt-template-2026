@@ -182,6 +182,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     }
 
     //  Always return the navigateTo(...) call, since calling it without return is a no-op.
+    // Note: to.fullPath will bring query params along with it
     return navigateTo({ path: '/login', query: { redirect: to.fullPath } })
   }
 })

@@ -133,7 +133,8 @@ useSeoMeta({
           class="divide-y"
         >
           <p class="p-4">
-            Add an edit button to the /posts/:id based on an owner check.
+            The login/logout authentication seems to work fine. But if I save any changes in the editor,
+            then go to logout, the redirect logic seems to fail! Wait... Maybe it's fine.
           </p>
 
           <p class="p-4">
@@ -145,10 +146,7 @@ useSeoMeta({
           </p>
 
           <p class="p-4">
-            Work on /posts/[id]/edit.<br>
-            Fix auth.global.ts so edit and create pages are protected. <br>
             Add /create link to /posts if the user is authenticated. <br>
-            Add /edit link to the /posts/[id] page if the user is authenticated and is the owner. <br>
             Once that's done, return to Syntax tutorial and implement cloud-based Turso DB.
           </p>
 

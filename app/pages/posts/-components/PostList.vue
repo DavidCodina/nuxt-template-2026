@@ -34,6 +34,7 @@ const reversedList = computed(() => [...posts.value].reverse())
 <template>
   <section class="mx-auto w-full max-w-3xl">
     <!-- Loading -->
+
     <div
       v-if="status === 'pending' && !posts.length"
       class="
