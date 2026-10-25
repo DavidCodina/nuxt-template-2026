@@ -4,7 +4,7 @@ import { auth } from '../utils/auth'
         Types
 ====================== */
 
-type PublicRule = {
+type PathRule = {
   path: string,
   /** If omitted, then all HTTP methods are matched (i.e., allowed).
    * Pass an array of specific methods to refine access control.
@@ -15,19 +15,22 @@ type PublicRule = {
 }
 
 /* ======================
-    PUBLIC_API_RULES
+        Rules
 ====================== */
 
-const PUBLIC_API_RULES: PublicRule[] = [
+const PUBLIC_API_RULES: PathRule[] = [
   { path: '/api/posts', prefix: true, methods: ['GET', 'HEAD'] }
+]
+
+const ADMIN_API_RULES: PathRule[] = [
+  { path: '/api/admin', prefix: true }
 ]
 
 /* ======================
       normalizePath()
 ====================== */
-// ⚠️ Gotcha: If there's a rule of  { path: '/api/users', methods: ['GET', 'HEAD'] },
-// but the request is for  types '/api/users/',  it will not match. This is why
-// normalizePath() is important.
+// ⚠️ Gotcha: If there's a rule of { path: '/api/users', methods: ['GET', 'HEAD'] }, but the
+// request is for '/api/users/',  it will not match. This is why normalizePath() is important.
 
 const normalizePath = (path: string) => {
   let result = path
@@ -38,22 +41,12 @@ const normalizePath = (path: string) => {
 }
 
 /* ======================
-      isPublic()
+        matches()
 ====================== */
 
-const isPublic = (rawPath: string, method: string) => {
+const matches = (rules: PathRule[], rawPath: string, method: string) => {
   const path = normalizePath(rawPath)
-  return PUBLIC_API_RULES.some((rule) => {
-    ///////////////////////////////////////////////////////////////////////////
-    //
-    // Condensed version is hard to read:
-    //
-    //   const pathMatches = rule.prefix ? path === rule.path || path.startsWith(rule.path + '/') : path === rule.path
-    //   const methodMatches = !rule.methods || rule.methods.includes(method)
-    //   return pathMatches && methodMatches
-    //
-    ///////////////////////////////////////////////////////////////////////////
-
+  return rules.some((rule) => {
     let pathMatches: boolean
 
     if (rule.prefix === true) {
@@ -119,7 +112,13 @@ export default defineEventHandler(async (event) => {
   // Better Auth's own endpoints must stay reachable
   if (path === '/api/auth' || path.startsWith('/api/auth/')) return
 
-  if (isPublic(path, event.method)) return
+  const isAdminApiPath = matches(ADMIN_API_RULES, path, event.method)
+  const isPublicApiPath = matches(PUBLIC_API_RULES, path, event.method)
+
+  // Admin rules take precedence over public rules.
+  // Prevent public rule from ever overlapping and having
+  // precedence over an admin route.
+  if (isPublicApiPath && !isAdminApiPath) return
 
   const session = await auth.api.getSession({ headers: event.headers })
 
@@ -132,6 +131,17 @@ export default defineEventHandler(async (event) => {
       }
     })
   }
+
+  if (isAdminApiPath && session?.user?.role !== 'ADMIN') {
+    throw httpError({
+      status: 403,
+      message: 'You do not have permission to access this resource.',
+      data: {
+        code: codes.FORBIDDEN
+      }
+    })
+  }
+
   // Note: the event.context.session type is declared in server/types/h3.d.ts
   // See also getSessionFromContextOrThrow helper in server/utils/
   event.context.session = session

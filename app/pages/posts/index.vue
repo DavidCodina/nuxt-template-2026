@@ -17,7 +17,6 @@ useSeoMeta({
   ogTitle: title,
   description,
   ogDescription: description
-
 })
 
 /* ======================

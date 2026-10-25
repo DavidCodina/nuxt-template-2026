@@ -62,14 +62,18 @@ export const auth = betterAuth({
     // https://better-auth.com/docs/concepts/users-accounts#delete-user
     deleteUser: {
       enabled: true
-    }
+    },
 
-    // additionalFields: {
-    //   role: {
-    //     type: 'string',
-    //     input: false
-    //   }
-    // }
+    additionalFields: {
+      role: {
+        type: ['USER', 'ADMIN'],
+        // Prevents users from setting their own role. Won't show up in
+        // type hinting for methods like authClient.updateUser({ }), and
+        // presumably won't even allow it if you tried.
+        input: false,
+        defaultValue: 'USER'
+      }
+    }
   },
 
   emailAndPassword: {

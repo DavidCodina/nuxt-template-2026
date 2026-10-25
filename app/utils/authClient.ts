@@ -1,5 +1,7 @@
 import { createAuthClient } from 'better-auth/vue'
-// import { inferAdditionalFields } from 'better-auth/client/plugins'
+import { inferAdditionalFields } from 'better-auth/client/plugins'
+
+import type { auth } from '#server/utils/auth'
 // import { stripeClient } from '@better-auth/stripe/client'
 
 /* ========================================================================
@@ -56,9 +58,26 @@ export const authClient = createAuthClient({
   // If your client and server are on the same URL
   // you shouldn't need to pass baseURL at all.
 
-  // plugins: [
-  //   inferAdditionalFields<typeof auth>()
-  // ],
+  plugins: [
+    ///////////////////////////////////////////////////////////////////////////
+    //
+    // Coding In Flow does this at 40:30.
+    // This does not affect the default types exported from 'better-auth'
+    // import { Session, User } from 'better-auth'
+    // Rather, what it does is inform the authClient.useSession() hook.
+    //
+    //   const value = authClient.useSession()
+    //   const { data  } = value
+    //   if (!data) { return null  }
+    //   const { session, user } = data
+    //
+    // Now user.role will be recognized, assuming we've correctly implemented
+    // user.additionalFields.role in @/lib/auth.ts
+    //
+    ///////////////////////////////////////////////////////////////////////////
+
+    inferAdditionalFields<typeof auth>()
+  ],
 
   // https://better-auth.com/docs/concepts/client#session-options
   sessionOptions: {}

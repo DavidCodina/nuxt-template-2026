@@ -41,6 +41,10 @@ const items = computed(() => {
       { label: 'User', to: '/user' }
     ]
   }
+
+  if (sessionData.value?.user?.role === 'ADMIN') {
+    navItems.push({ label: 'Admin', to: '/admin' })
+  }
   return navItems
 })
 

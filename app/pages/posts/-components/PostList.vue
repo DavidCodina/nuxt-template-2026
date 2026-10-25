@@ -1,4 +1,6 @@
 <script setup lang="ts">
+// Todo: Add filtering by name.
+
 /* ======================
         Imports
 ====================== */
@@ -33,6 +35,17 @@ const reversedList = computed(() => [...posts.value].reverse())
 
 <template>
   <section class="mx-auto w-full max-w-3xl">
+    <Authenticated>
+      <UButton
+        class="mx-auto mb-4 flex min-w-25 justify-center select-none"
+        label="Create Post"
+        icon="i-lucide-notebook-pen"
+        color="success"
+        variant="subtle"
+        @click="navigateTo(`/posts/create`)"
+      />
+    </Authenticated>
+
     <!-- Loading -->
 
     <div
@@ -59,7 +72,7 @@ const reversedList = computed(() => [...posts.value].reverse())
     <!-- Error -->
     <UAlert
       v-else-if="error"
-      class="mx-auto max-w-125 shadow-lg ring-error"
+      class="mx-auto max-w-150 shadow-lg ring-error"
       color="error"
       variant="subtle"
       icon="i-lucide-triangle-alert"

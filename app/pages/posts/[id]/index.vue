@@ -61,6 +61,7 @@ const isEdited = computed(() => {
   )
 })
 
+// Could create a composable for this.
 const isOwner = computed(() => {
   const sessionUserId = sessionData.value?.user.id
   const postUserId = post.value?.userId
@@ -195,6 +196,8 @@ definePageMeta({ auth: false })
                 :datetime="post.createdAt"
                 date-style="long"
               />
+
+              <!-- Or just wrap in <Owner> -->
               <UBadge
                 v-if="isOwner"
                 label="Owner"
@@ -223,30 +226,29 @@ definePageMeta({ auth: false })
             {{ post.body }}
           </p>
 
-          <div
-            v-if="isOwner"
-            class="mt-6 flex justify-end gap-2"
-          >
-            <UButton
-              class="min-w-25 justify-center select-none"
-              label="Delete"
-              icon="i-lucide-trash-2"
-              color="error"
-              variant="subtle"
-              :loading="isDeleting"
-              @click="handleDelete"
-            />
+          <Owner :owner-id="post.userId">
+            <div class="mt-6 flex justify-end gap-2">
+              <UButton
+                class="min-w-25 justify-center select-none"
+                label="Delete"
+                icon="i-lucide-trash-2"
+                color="error"
+                variant="subtle"
+                :loading="isDeleting"
+                @click="handleDelete"
+              />
 
-            <UButton
-              class="min-w-25 justify-center select-none"
-              label="Edit"
-              icon="i-lucide-pencil"
-              color="info"
-              variant="subtle"
+              <UButton
+                class="min-w-25 justify-center select-none"
+                label="Edit"
+                icon="i-lucide-pencil"
+                color="info"
+                variant="subtle"
 
-              @click="navigateTo(`/posts/${id}/edit`)"
-            />
-          </div>
+                @click="navigateTo(`/posts/${id}/edit`)"
+              />
+            </div>
+          </Owner>
         </section>
       </template>
     </PageContainer>
